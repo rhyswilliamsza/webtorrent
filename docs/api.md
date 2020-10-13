@@ -60,6 +60,8 @@ If `opts` is specified, then the default options (shown below) will be overridde
   dht: Boolean|Object,     // Enable DHT (default=true), or options object for DHT
   webSeeds: Boolean        // Enable BEP19 web seeds (default=true)
   utp: Boolean             // Enable BEP29 uTorrent transport protocol (default=false)
+  downloadLimit: Number,   // Download speed limit in bytes (default=Number.MAX_VALUE) - e.g. (200*1024) is 200kB or 1.6mbps
+  uploadLimit: Number,     // Upload speed limit in bytes (default=Number.MAX_VALUE)
 }
 ```
 
