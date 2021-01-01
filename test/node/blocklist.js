@@ -1,9 +1,9 @@
-var fixtures = require('webtorrent-fixtures')
-var fs = require('fs')
-var http = require('http')
-var test = require('tape')
-var WebTorrent = require('../../')
-var zlib = require('zlib')
+const fixtures = require('webtorrent-fixtures')
+const fs = require('fs')
+const http = require('http')
+const test = require('tape')
+const WebTorrent = require('../../')
+const zlib = require('zlib')
 
 function assertBlocked (t, torrent, addr) {
   torrent.once('blockedPeer', function (_addr) {
@@ -22,9 +22,10 @@ function assertReachable (t, torrent, addr) {
 test('blocklist (single IP)', function (t) {
   t.plan(9)
 
-  var client = new WebTorrent({
+  const client = new WebTorrent({
     dht: false,
     tracker: false,
+    lsd: false,
     blocklist: ['1.2.3.4']
   })
   client.on('error', function (err) { t.fail(err) })
@@ -48,9 +49,10 @@ test('blocklist (single IP)', function (t) {
 test('blocklist (array of IPs)', function (t) {
   t.plan(13)
 
-  var client = new WebTorrent({
+  const client = new WebTorrent({
     dht: false,
     tracker: false,
+    lsd: false,
     blocklist: ['1.2.3.4', '5.6.7.8']
   })
     .on('error', function (err) { t.fail(err) })
@@ -112,9 +114,10 @@ function assertList (t, torrent) {
 
 test('blocklist (array of IP ranges)', function (t) {
   t.plan(49)
-  var client = new WebTorrent({
+  const client = new WebTorrent({
     dht: false,
     tracker: false,
+    lsd: false,
     blocklist: [
       { start: '1.2.3.0', end: '1.2.3.255' },
       { start: '5.6.7.0', end: '5.6.7.255' }
@@ -134,7 +137,7 @@ test('blocklist (array of IP ranges)', function (t) {
 
 test('blocklist (http url)', function (t) {
   t.plan(51)
-  var server = http.createServer(function (req, res) {
+  const server = http.createServer(function (req, res) {
     // Check that WebTorrent declares a user agent
     t.ok(req.headers['user-agent'].indexOf('WebTorrent') !== -1)
 
@@ -142,11 +145,12 @@ test('blocklist (http url)', function (t) {
   })
 
   server.listen(0, function () {
-    var port = server.address().port
-    var url = 'http://127.0.0.1:' + port
-    var client = new WebTorrent({
+    const port = server.address().port
+    const url = 'http://127.0.0.1:' + port
+    const client = new WebTorrent({
       dht: false,
       tracker: false,
+      lsd: false,
       blocklist: url
     })
       .on('error', function (err) { t.fail(err) })
@@ -167,7 +171,7 @@ test('blocklist (http url)', function (t) {
 
 test('blocklist (http url with gzip encoding)', function (t) {
   t.plan(51)
-  var server = http.createServer(function (req, res) {
+  const server = http.createServer(function (req, res) {
     // Check that WebTorrent declares a user agent
     t.ok(req.headers['user-agent'].indexOf('WebTorrent') !== -1)
 
@@ -178,11 +182,12 @@ test('blocklist (http url with gzip encoding)', function (t) {
   })
 
   server.listen(0, function () {
-    var port = server.address().port
-    var url = 'http://127.0.0.1:' + port
-    var client = new WebTorrent({
+    const port = server.address().port
+    const url = 'http://127.0.0.1:' + port
+    const client = new WebTorrent({
       dht: false,
       tracker: false,
+      lsd: false,
       blocklist: url
     })
       .on('error', function (err) { t.fail(err) })
@@ -203,7 +208,7 @@ test('blocklist (http url with gzip encoding)', function (t) {
 
 test('blocklist (http url with deflate encoding)', function (t) {
   t.plan(51)
-  var server = http.createServer(function (req, res) {
+  const server = http.createServer(function (req, res) {
     // Check that WebTorrent declares a user agent
     t.ok(req.headers['user-agent'].indexOf('WebTorrent') !== -1)
 
@@ -214,11 +219,12 @@ test('blocklist (http url with deflate encoding)', function (t) {
   })
 
   server.listen(0, function () {
-    var port = server.address().port
-    var url = 'http://127.0.0.1:' + port
-    var client = new WebTorrent({
+    const port = server.address().port
+    const url = 'http://127.0.0.1:' + port
+    const client = new WebTorrent({
       dht: false,
       tracker: false,
+      lsd: false,
       blocklist: url
     })
       .on('error', function (err) { t.fail(err) })
@@ -239,9 +245,10 @@ test('blocklist (http url with deflate encoding)', function (t) {
 
 test('blocklist (fs path)', function (t) {
   t.plan(49)
-  var client = new WebTorrent({
+  const client = new WebTorrent({
     dht: false,
     tracker: false,
+    lsd: false,
     blocklist: fixtures.blocklist.path
   })
     .on('error', function (err) { t.fail(err) })
@@ -258,9 +265,10 @@ test('blocklist (fs path)', function (t) {
 
 test('blocklist (fs path with gzip)', function (t) {
   t.plan(49)
-  var client = new WebTorrent({
+  const client = new WebTorrent({
     dht: false,
     tracker: false,
+    lsd: false,
     blocklist: fixtures.blocklist.gzipPath
   })
     .on('error', function (err) { t.fail(err) })

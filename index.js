@@ -14,6 +14,7 @@ const Peer = require('simple-peer')
 const randombytes = require('randombytes')
 const speedometer = require('speedometer')
 const ThrottleGroup = require('stream-throttle').ThrottleGroup
+const queueMicrotask = require('queue-microtask')
 
 const ConnPool = require('./lib/conn-pool') // browser exclude
 const Torrent = require('./lib/torrent')
@@ -71,6 +72,7 @@ class WebTorrent extends EventEmitter {
     this.torrentPort = opts.torrentPort || 0
     this.dhtPort = opts.dhtPort || 0
     this.tracker = opts.tracker !== undefined ? opts.tracker : {}
+    this.lsd = opts.lsd !== false
     this.torrents = []
     this.maxConns = Number(opts.maxConns) || 55
     this.utp = opts.utp === true
@@ -107,7 +109,7 @@ class WebTorrent extends EventEmitter {
     if (typeof ConnPool === 'function') {
       this._connPool = new ConnPool(this)
     } else {
-      process.nextTick(() => {
+      queueMicrotask(() => {
         this._onListening()
       })
     }
@@ -157,7 +159,7 @@ class WebTorrent extends EventEmitter {
         ready()
       })
     } else {
-      process.nextTick(ready)
+      queueMicrotask(ready)
     }
   }
 
@@ -215,7 +217,7 @@ class WebTorrent extends EventEmitter {
    * @param {Object} opts torrent-specific options
    * @param {function=} ontorrent called when the torrent is ready (has metadata)
    */
-  add (torrentId, opts = {}, ontorrent) {
+  add (torrentId, opts = {}, ontorrent = () => {}) {
     if (this.destroyed) throw new Error('client is destroyed')
     if (typeof opts === 'function') [opts, ontorrent] = [{}, opts]
 
@@ -231,7 +233,7 @@ class WebTorrent extends EventEmitter {
 
     const onReady = () => {
       if (this.destroyed) return
-      if (typeof ontorrent === 'function') ontorrent(torrent)
+      ontorrent(torrent)
       this.emit('torrent', torrent)
     }
 

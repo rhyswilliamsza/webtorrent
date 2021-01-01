@@ -1,10 +1,10 @@
-var fixtures = require('webtorrent-fixtures')
-var fs = require('fs')
-var MemoryChunkStore = require('memory-chunk-store')
-var series = require('run-series')
-var test = require('tape')
-var TrackerServer = require('bittorrent-tracker/server')
-var WebTorrent = require('../../')
+const fixtures = require('webtorrent-fixtures')
+const fs = require('fs')
+const MemoryChunkStore = require('memory-chunk-store')
+const series = require('run-series')
+const test = require('tape')
+const TrackerServer = require('bittorrent-tracker/server')
+const WebTorrent = require('../../')
 
 test('Download using UDP tracker (via .torrent file)', function (t) {
   torrentDownloadTest(t, 'udp')
@@ -17,10 +17,10 @@ test('Download using HTTP tracker (via .torrent file)', function (t) {
 function torrentDownloadTest (t, serverType) {
   t.plan(9)
 
-  var trackerStartCount = 0
-  var parsedTorrent = Object.assign({}, fixtures.leaves.parsedTorrent)
+  let trackerStartCount = 0
+  const parsedTorrent = Object.assign({}, fixtures.leaves.parsedTorrent)
 
-  var tracker = new TrackerServer(
+  const tracker = new TrackerServer(
     serverType === 'udp' ? { http: false, ws: false } : { udp: false, ws: false }
   )
 
@@ -31,7 +31,7 @@ function torrentDownloadTest (t, serverType) {
     trackerStartCount += 1
   })
 
-  var client1, client2
+  let client1, client2
 
   series([
     function (cb) {
@@ -39,13 +39,13 @@ function torrentDownloadTest (t, serverType) {
     },
 
     function (cb) {
-      client1 = new WebTorrent({ dht: false })
+      client1 = new WebTorrent({ dht: false, lsd: false })
       client1.on('error', function (err) { t.fail(err) })
       client1.on('warning', function (err) { t.fail(err) })
 
-      var port = tracker[serverType].address().port
+      const port = tracker[serverType].address().port
 
-      var announceUrl = serverType === 'http'
+      const announceUrl = serverType === 'http'
         ? 'http://127.0.0.1:' + port + '/announce'
         : 'udp://127.0.0.1:' + port
 
@@ -56,7 +56,7 @@ function torrentDownloadTest (t, serverType) {
         // torrent metadata has been fetched -- sanity check it
         t.equal(torrent.name, 'Leaves of Grass by Walt Whitman.epub')
 
-        var names = [
+        const names = [
           'Leaves of Grass by Walt Whitman.epub'
         ]
 
@@ -69,13 +69,16 @@ function torrentDownloadTest (t, serverType) {
     },
 
     function (cb) {
-      client2 = new WebTorrent({ dht: false })
+      client2 = new WebTorrent({ dht: false, lsd: false })
       client2.on('error', function (err) { t.fail(err) })
       client2.on('warning', function (err) { t.fail(err) })
 
       client2.add(parsedTorrent, { store: MemoryChunkStore })
 
       client2.on('torrent', function (torrent) {
+        let gotBuffer = false
+        let torrentDone = false
+
         torrent.files.forEach(function (file) {
           file.getBuffer(function (err, buf) {
             if (err) throw err
@@ -91,8 +94,6 @@ function torrentDownloadTest (t, serverType) {
           maybeDone()
         })
 
-        var gotBuffer = false
-        var torrentDone = false
         function maybeDone () {
           if (gotBuffer && torrentDone) cb(null)
         }

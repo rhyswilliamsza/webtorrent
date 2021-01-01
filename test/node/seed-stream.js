@@ -1,18 +1,18 @@
-var Readable = require('readable-stream').Readable
-var series = require('run-series')
-var test = require('tape')
-var Tracker = require('bittorrent-tracker/server')
-var WebTorrent = require('../../')
+const Readable = require('readable-stream').Readable
+const series = require('run-series')
+const test = require('tape')
+const Tracker = require('bittorrent-tracker/server')
+const WebTorrent = require('../../')
 
 test('client.seed: stream', function (t) {
   t.plan(9)
 
-  var tracker = new Tracker({ udp: false, ws: false })
+  const tracker = new Tracker({ udp: false, ws: false })
 
   tracker.on('error', function (err) { t.fail(err) })
   tracker.on('warning', function (err) { t.fail(err) })
 
-  var seeder, client, announceUrl, magnetURI
+  let seeder, client, announceUrl, magnetURI
 
   series([
     function (cb) {
@@ -20,20 +20,20 @@ test('client.seed: stream', function (t) {
     },
 
     function (cb) {
-      var port = tracker.http.address().port
+      const port = tracker.http.address().port
       announceUrl = 'http://localhost:' + port + '/announce'
 
-      seeder = new WebTorrent({ dht: false })
+      seeder = new WebTorrent({ dht: false, lsd: false })
 
       seeder.on('error', function (err) { t.fail(err) })
       seeder.on('warning', function (err) { t.fail(err) })
 
-      var stream = new Readable()
+      const stream = new Readable()
       stream._read = function () {}
       stream.push('HELLO WORLD\n')
       stream.push(null)
 
-      var seederOpts = {
+      const seederOpts = {
         name: 'hello.txt',
         pieceLength: 5,
         announce: [announceUrl]
@@ -45,7 +45,7 @@ test('client.seed: stream', function (t) {
     },
 
     function (cb) {
-      client = new WebTorrent({ dht: false })
+      client = new WebTorrent({ dht: false, lsd: false })
 
       client.on('error', function (err) { t.fail(err) })
       client.on('warning', function (err) { t.fail(err) })
